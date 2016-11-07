@@ -64,11 +64,18 @@ public class Reducer {
 	}
 	
 	void storeReduceCount(ReduceThread t) {
-		reduceCount.put(t.getKey(), t.getCount());
+		reduceCount.put(t.getEntry().getKey(), t.getCount());
 	}
 	
 	Map<String, Integer> getReduceCount() {
 		return reduceCount;
+	}
+	
+	void retry(ReduceThread t) {
+		System.out.println("Retrying for idx = " + t.getIdx());
+		threads.remove(t);
+		
+		queue(new ReduceThread(t.getIdx(), t.getHost(), t.getEntry(), this));		
 	}
 
 }

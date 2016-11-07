@@ -48,10 +48,6 @@ public class Main {
 		List<String> lines;
 		List<String> linesToWrite = new ArrayList<String>();
 		
-		PrintWriter w= new PrintWriter(W + "args_length_" + key);
-		w.println(args.length - 3);
-		w.close();
-		
 		for (int i = SM_INDEX+1; i < args.length; i++) {
 			lines = readFile(W + "UnsortedMap/UM" + args[i]);
 			for (String line: lines) {
