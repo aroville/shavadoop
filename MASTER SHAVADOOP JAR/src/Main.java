@@ -23,6 +23,15 @@ import java.util.Map.Entry;
  * Finally, the Main in MASTER SHAVADOOP JAR gets back the RMx by the standard Output en assembles it on a result file.
  */
 public class Main {
+	
+/**
+ * This Main class (from MASTER SHAVADOOP JAR) is responsible of :
+ * 1) Retrieving available hosts from a list of hosts @see SSHUtils
+ * 2) Reading the file on which we want to execute the wordcount @see Util
+ * 3) Instanciating a Mapper which will split the read file on a fixed size of chunks	@see Mapper
+ * 4) Instanciating a Reducer which will reduce by key (e.g a word) the unsorted map given by the Mapper @see Reducer
+ * 5) Assembling all the results in a result file
+ */
 
 	private static final String W = "/cal/homes/aroville/";
 
