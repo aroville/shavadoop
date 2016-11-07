@@ -10,8 +10,8 @@ import java.util.List;
 
 /**
  * 
- * @author arvignes
- *
+ * @author aroville, rvignes
+ * @see Main of MASTER SHAVADOOP JAR 	
  */
 
 
