@@ -12,8 +12,10 @@ import java.util.Map.Entry;
  * It is composed of two separate pieces of code : the Master and the Slave.
  * The Master is responsible of reading an input file, for example Mayotte's Forest Code, splitting the file line by line
  * Distributing the splits on previously retrieved available hosts on the network.
- * the distribution is realised by starting on each host a thread giving the 
- *  
+ * the distribution is realised by starting on each host a MapThread ( @see MapThread) giving a split as parameter.
+ * The MapThread also receive the code we want to be executed on the Split given as a Jar File @see SLAVE SHAVADOOP JAR.
+ * In our case this code is a simple Word Count @see Main of SLAVE SHAVADOOP JAR.
+ * The Slave outputs the 
  */
 public class Main {
 
