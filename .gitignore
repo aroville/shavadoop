@@ -3,3 +3,5 @@
 *.jar
 *.txt
 systemes_repartis_bigdata/**
+SLAVE SHAVADOOP JAR/bin/Main.class
+MASTER SHAVADOOP JAR/bin/*.class
