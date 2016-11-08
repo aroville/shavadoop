@@ -8,13 +8,21 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 public class Reducer {
-
+/**
+ * Class instantiated by the main of MASTER SHAVADOOP JAR with the list of available hosts and 
+ * UMx outputed by the mapper
+ */
 	List<String> hosts;
 	List<ReduceThread> threads;
 	Map<String, ArrayList<Integer>> keyUMx;
 	Map<String, Integer> reduceCount;
 	static final int MAX_WORK_LOAD = 100;
 
+	/**
+	 * 
+	 * @param hosts
+	 * @param keyUMx
+	 */
 	public Reducer(List<String> hosts, Map<String, ArrayList<Integer>> keyUMx) {
 		this.hosts = hosts;
 		this.keyUMx = keyUMx;
@@ -22,6 +30,14 @@ public class Reducer {
 		reduceCount = Collections.synchronizedMap(new HashMap<String, Integer>());
 	}
 
+	/**
+	 * This method distributes the data (entry sets of UMx files) and computation on the available hosts.
+	 * It proceeds by instanciating ReduceThreads, @see ReduceThread, giving the host on which we want the computation to be done,
+	 * an entry of the UMx and it's index and a reference to the calling Reducer.
+	 * The distribution is done using a modulo between the number of UMx and the number of available hosts
+	 * @throws Exception
+	 * 
+	 */
 	void reduce() {
 		System.out.println("Start reduce");
 		long startTime, timeSpent;
@@ -54,24 +70,43 @@ public class Reducer {
 		System.out.println("Reduce over");
 	}
 
+	/**Enqueues a given ReduceThread and calls its start method 
+	 * @param t
+	 */
 	synchronized void queue(ReduceThread t) {
 		threads.add(t);
 		t.start();
 	}
 
+	/**Dequeues a given ReduceThread and calls the method storeReduceCount 
+	 * @param t
+	 */
 	synchronized void dequeue(ReduceThread t) {
 		threads.remove(t);
 		storeReduceCount(t);
 	}
-
+	
+	/**
+	 * Insert a key (e.g a word) and it's count onto the Reducer's reduceCount
+	 * @param t
+	 */
 	void storeReduceCount(ReduceThread t) {
 		reduceCount.put(t.getEntry().getKey(), t.getCount());
 	}
-
+	
+	/**Getter of Reducer's reduceCount
+	 * @return reduceCount
+	 */
 	Map<String, Integer> getReduceCount() {
 		return reduceCount;
 	}
-
+	
+	/**Restarts a given ReduceThread if its instanciation failed. 
+	 * As we are network dependent (ReduceThreads are started on other machines by SSH)
+	 * we can encounter issues when trying to connect.
+	 * @see ReduceThread
+	 * @param ReduceThread t
+	 */
 	void retry(ReduceThread t) {
 		System.out.println("Retrying for idx = " + t.getIdx() + "  key = " + t.getEntry().getKey());
 		threads.remove(t);
