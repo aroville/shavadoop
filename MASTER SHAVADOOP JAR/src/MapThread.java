@@ -2,6 +2,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**Class instantiated by the Mapper @see Mapper
+ * giving an host, an index of split and the reference to the calling Mapper
+ * @author aroville,rvignes
+ *
+ */
+
 
 public class MapThread extends Thread {
 
@@ -12,13 +18,24 @@ public class MapThread extends Thread {
 	Mapper mapper;
 	List<String> keys;
 
-
+/**
+ * 
+ * @param host
+ * @param idx
+ * @param mapper
+ */
 	MapThread(String host, Integer idx, Mapper mapper) {
 		this.host = host;
 		this.idx = idx;
 		this.mapper = mapper;
 	}
 
+	/**
+	 * Overriden run method of Thread 
+	 * Starts the MapThread which remotely calls the Main of the Slave jar file.
+	 * This call is done by a bash command line, which invoke the command java -jar with the path to the jar and 
+	 * the index number of the Sx file on given host by ssh 
+	 */
 	public void run() {
 		keys = new ArrayList<String>();
 		try {
@@ -40,14 +57,26 @@ public class MapThread extends Thread {
 		}
 	}
 	
+	/**
+	 * 
+	 * @return MapThread's host
+	 */
 	String getHost() {
 		return host;
 	}
 
+	/**
+	 * 
+	 * @return MapThread's list of keys 
+	 */
 	List<String> getKeys() {
 		return keys;
 	}
 
+	/**
+	 * 
+	 * @return MapThread's split index
+	 */
 	Integer getIdx() {
 		return idx;
 	}
