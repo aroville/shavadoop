@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 public class Reducer {
@@ -12,7 +13,7 @@ public class Reducer {
 	List<ReduceThread> threads;
 	Map<String, ArrayList<Integer>> keyUMx;
 	Map<String, Integer> reduceCount;
-	static final int MAX_WORK_LOAD = 20;
+	static final int MAX_WORK_LOAD = 100;
 
 	public Reducer(List<String> hosts, Map<String, ArrayList<Integer>> keyUMx) {
 		this.hosts = hosts;
@@ -24,7 +25,7 @@ public class Reducer {
 	void reduce() {
 		System.out.println("Start reduce");
 		long startTime, timeSpent;
-		
+
 		int nbHosts = hosts.size();
 		String host;
 		int i = 0;
@@ -35,13 +36,13 @@ public class Reducer {
 				while (threads.size() >= MAX_WORK_LOAD) {
 					Thread.sleep(200);
 				}
-				
+
 				host = hosts.get(i % nbHosts);
 				queue(new ReduceThread(i++, host, e, this));
 			}
 			timeSpent = System.currentTimeMillis() - startTime;
 			System.out.println("Time spent on shuffling: " + timeSpent);
-			
+
 			while (threads.size() > 0) {
 				System.out.println("Threads to finish = " + threads.size());
 				Thread.sleep(2000);
@@ -52,7 +53,7 @@ public class Reducer {
 
 		System.out.println("Reduce over");
 	}
-	
+
 	synchronized void queue(ReduceThread t) {
 		threads.add(t);
 		t.start();
@@ -62,20 +63,29 @@ public class Reducer {
 		threads.remove(t);
 		storeReduceCount(t);
 	}
-	
+
 	void storeReduceCount(ReduceThread t) {
 		reduceCount.put(t.getEntry().getKey(), t.getCount());
 	}
-	
+
 	Map<String, Integer> getReduceCount() {
 		return reduceCount;
 	}
-	
+
 	void retry(ReduceThread t) {
-		System.out.println("Retrying for idx = " + t.getIdx());
+		System.out.println("Retrying for idx = " + t.getIdx() + "  key = " + t.getEntry().getKey());
 		threads.remove(t);
-		
-		queue(new ReduceThread(t.getIdx(), t.getHost(), t.getEntry(), this));		
+
+		try {
+
+			Integer tIndex = ThreadLocalRandom.current().nextInt(0, hosts.size());
+			while (threads.size() >= MAX_WORK_LOAD) {
+				Thread.sleep(200);
+			}
+			queue(new ReduceThread(t.getIdx(), hosts.get(tIndex), t.getEntry(), this));		
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}	
 	}
 
 }
