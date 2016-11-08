@@ -69,28 +69,46 @@ public class Reducer {
 		System.out.println("Reduce over");
 	}
 	
+	/**Enqueues a given ReduceThread and calls its start method 
+	 * @param t
+	 */
 	synchronized void queue(ReduceThread t) {
 		threads.add(t);
 		t.start();
 	}
 
+	/**Dequeues a given ReduceThread and calls the method storeReduceCount 
+	 * @param t
+	 */
 	synchronized void dequeue(ReduceThread t) {
 		threads.remove(t);
 		storeReduceCount(t);
 	}
 	
+	/**
+	 * Insert a key (e.g a word) and it's count onto the Reducer's reduceCount
+	 * @param t
+	 */
 	void storeReduceCount(ReduceThread t) {
 		reduceCount.put(t.getEntry().getKey(), t.getCount());
 	}
 	
+	/**Getter of Reducer's reduceCount
+	 * @return reduceCount
+	 */
 	Map<String, Integer> getReduceCount() {
 		return reduceCount;
 	}
 	
+	/**Restarts a given ReduceThread if its instanciation failed. 
+	 * As we are network dependent (ReduceThreads are started on other machines by SSH)
+	 * we can encounter issues when trying to connect.
+	 * @see ReduceThread
+	 * @param ReduceThread t
+	 */
 	void retry(ReduceThread t) {
 		System.out.println("Retrying for idx = " + t.getIdx());
 		threads.remove(t);
-		
 		queue(new ReduceThread(t.getIdx(), t.getHost(), t.getEntry(), this));		
 	}
 
