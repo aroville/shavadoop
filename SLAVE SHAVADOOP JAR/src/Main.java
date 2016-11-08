@@ -8,10 +8,11 @@ import java.util.HashSet;
 import java.util.List;
 
 
-/**
+/**This class contains all the pieces of code to be sent over the network (computation distribution) on available hosts.
+ * It should be exported as a runnable JAR in order to be remotely invoked by a command line outputed by a MapThread or a ReduceThread
  * 
  * @author aroville, rvignes
- * @see Main of MASTER SHAVADOOP JAR 	
+ * @see Main of MASTER SHAVADOOP JAR, MapThread, ReduceThread 	
  */
 
 
@@ -27,7 +28,7 @@ public class Main {
 
 
 
-	/**
+	/**Executes the map or reduce method considering the argument given to the Main(by the remote command line)
 	 * 
 	 * @param args
 	 * @throws InterruptedException
@@ -43,7 +44,8 @@ public class Main {
 	}
 
 
-	/**
+	/**Computes the reduce count from a given UMx file and outputs it on the standard output
+	 * in order to be read by the reduceThread which executed the Slave JAR
 	 * 
 	 * @param idx
 	 * @throws IOException 
@@ -72,7 +74,7 @@ public class Main {
 	}
 
 
-	/**
+	/**Computes the mapping given a split file (by its index) and writes the result on a UMx file
 	 * 
 	 * @param idx
 	 * @throws IOException
@@ -93,6 +95,12 @@ public class Main {
 		}
 	}
 
+	/**read a given file and outputs all line as a list of lines
+	 * 
+	 * @param fileUrl
+	 * @return all lines read from a file
+	 * @throws IOException
+	 */
 	public static List<String> readFile(String fileUrl) throws IOException {
 		return Files.readAllLines(Paths.get(fileUrl), CHARSET);
 	}
