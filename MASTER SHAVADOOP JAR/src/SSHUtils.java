@@ -27,7 +27,7 @@ public class SSHUtils {
 
 	/**
 	 * Launch a python program to ping around the room and find the available machines
-	 * @param room
+	 * @param room id
 	 */
 	static void getHosts(String room) {
 		try {
@@ -39,7 +39,12 @@ public class SSHUtils {
 	}
 	
 
-	
+	/**Executes a given command line on the underlying Unix OS CLI.
+	 * 
+	 * @param cmd
+	 * @return the OS answer to the inputed command line
+	 * @throws IOException
+	 */
 	public static ProcessResponse execute(String[] cmd) throws IOException {
 		InputStream is = null;
 		Process p = null;
@@ -83,6 +88,13 @@ public class SSHUtils {
 		
 		return output;
 	}
+	
+	/**Tries to connect by ssh to a given host and tests it's availability by echoing 'pizza'
+	 * 
+	 * @param host
+	 * @return host's availability
+	 * @throws IOException
+	 */
 	
 	public static boolean canConnectSSH(String host) throws IOException {
 		InputStream errIs = null;

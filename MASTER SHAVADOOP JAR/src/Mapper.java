@@ -36,10 +36,11 @@ public class Mapper {
 	}
 
 	/**
-	 * This method distributes the data (one or several lines depending on the configuration of a split) on the available Hosts.
+	 * This method distributes the data (one or several lines depending on the configuration of a split) and computation on the available Hosts.
 	 * It proceeds by instanciating MapThreads, @see MapThread, giving the host on which we want the computation to be done
 	 * and the index of the Sx file to give to the MapThread
 	 * The distribution is done using a modulo between the number of splits and the number of available hosts
+	 * @throws Exception
 	 *  
 	 */
 	void split() {
@@ -88,7 +89,7 @@ public class Mapper {
 	}
 
 	/**
-	 * Retrieve the collected keys and the associated UMx file
+	 * Retrieve the collected keys from the SLAVE SHAVADOOP JAR output and the associated UMx file
 	 * @param t
 	 */
 	private void storeKeyUMx(MapThread t) {

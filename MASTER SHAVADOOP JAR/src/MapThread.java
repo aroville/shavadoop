@@ -34,7 +34,7 @@ public class MapThread extends Thread {
 	 * Overriden run method of Thread 
 	 * Starts the MapThread which remotely calls the Main of the Slave jar file.
 	 * This call is done by a bash command line, which invoke the command java -jar with the path to the jar and 
-	 * the index number of the Sx file on given host by ssh 
+	 * the index number of the Sx file on given host by ssh @see SSHUtils, Main of SLAVE SHAVADOOP JAR
 	 */
 	public void run() {
 		keys = new ArrayList<String>();

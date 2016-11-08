@@ -7,13 +7,21 @@ import java.util.Map.Entry;
 
 
 public class Reducer {
-
+/**
+ * Class instantiated by the main of MASTER SHAVADOOP JAR with the list of available hosts and 
+ * UMx outputed by the mapper
+ */
 	List<String> hosts;
 	List<ReduceThread> threads;
 	Map<String, ArrayList<Integer>> keyUMx;
 	Map<String, Integer> reduceCount;
 	static final int MAX_WORK_LOAD = 20;
 
+	/**
+	 * 
+	 * @param hosts
+	 * @param keyUMx
+	 */
 	public Reducer(List<String> hosts, Map<String, ArrayList<Integer>> keyUMx) {
 		this.hosts = hosts;
 		this.keyUMx = keyUMx;
@@ -21,6 +29,14 @@ public class Reducer {
 		reduceCount = Collections.synchronizedMap(new HashMap<String, Integer>());
 	}
 
+	/**
+	 * This method distributes the data (entry sets of UMx files) and computation on the available hosts.
+	 * It proceeds by instanciating ReduceThreads, @see ReduceThread, giving the host on which we want the computation to be done,
+	 * an entry of the UMx and it's index and a reference to the calling Reducer.
+	 * The distribution is done using a modulo between the number of UMx and the number of available hosts
+	 * @throws Exception
+	 * 
+	 */
 	void reduce() {
 		System.out.println("Start reduce");
 		long startTime, timeSpent;
