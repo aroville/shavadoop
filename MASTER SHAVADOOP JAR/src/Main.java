@@ -38,10 +38,9 @@ public class Main {
 
 	public static void main(String[] args) throws IOException {
 		long startTime, timeSpent;
-		Integer[] l = new Integer[] { 133 };
 
 		startTime = System.currentTimeMillis();
-		List<String> hosts = SSHUtils.readHosts(l);
+		List<String> hosts = SSHUtils.readHosts();
 		timeSpent = System.currentTimeMillis() - startTime;
 		System.out.println("Time spent on getting hosts: " + timeSpent);
 		
