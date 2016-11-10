@@ -9,13 +9,15 @@ import java.util.List;
 
 
 public class SSHUtils {
+
 	
 	/**
 	 * Read the list of hosts retrieved by the python program
 	 * @return
 	 * @throws IOException
 	 */
-	static List<String> readHosts(Integer[] rooms) throws IOException {
+	static List<String> readHosts() throws IOException {
+		Integer[] rooms = new Integer[] { 133 };
 		ArrayList<String> hosts = new ArrayList<String>();
 		for (Integer room: rooms) {
 			getHosts(room.toString());

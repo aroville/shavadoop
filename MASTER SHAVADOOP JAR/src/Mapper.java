@@ -67,7 +67,7 @@ public class Mapper {
 				}
 
 				if (writeLine(i)) {
-					host = hosts.get(i % nbHosts);
+					host = hosts.get((i / STEP) % nbHosts);
 					queue(new MapThread(host, i, this));
 				}
 			}
