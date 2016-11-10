@@ -2,6 +2,7 @@ package com.telecom.master.shavadoop
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,7 +40,7 @@ public class Main {
 
 	public static void main(String[] args) throws IOException {
 		long startTime, timeSpent;
-		Integer[] l = new Integer[] { 45, 125, 126, 127, 128, 129, 130, 133 };
+		Integer[] l = new Integer[] { 133 };
 
 		startTime = System.currentTimeMillis();
 		List<String> hosts = SSHUtils.readHosts(l);
@@ -53,12 +54,14 @@ public class Main {
 
 		startTime = System.currentTimeMillis();
 		Mapper mapper = new Mapper(hosts, lines);
-		mapper.split();
+		mapper.distribute();
 		timeSpent = System.currentTimeMillis() - startTime;
 		System.out.println("Time spent on mapping: " + timeSpent);
 
 		startTime = System.currentTimeMillis();
-		Reducer reducer = new Reducer(hosts, mapper.getKeyUMx());
+		Map<String, ArrayList<Integer>> keyUMx = mapper.getKeyUMx();
+		System.out.println(keyUMx);
+		Reducer reducer = new Reducer(hosts, keyUMx);
 		reducer.reduce();
 		timeSpent = System.currentTimeMillis() - startTime;
 		System.out.println("Time spent on reducing: " + timeSpent);
@@ -66,7 +69,7 @@ public class Main {
 		startTime = System.currentTimeMillis();
 		Map<String, Integer> result = reducer.getReduceCount();
 		PrintWriter writer = new PrintWriter(W + "RESULT_SHAVADOOP");
-		for (Entry<String, Integer> key_count: result.entrySet()) {
+		for (Entry<String, Integer> key_count: Util.sortByValue(result).entrySet()) {
 			writer.println(key_count.getKey() + " " + key_count.getValue());
 		}
 		writer.close();

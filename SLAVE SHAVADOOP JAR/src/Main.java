@@ -6,8 +6,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Pattern;
 
 
 
@@ -28,6 +30,19 @@ public class Main {
 	private static final int S_INDEX = 1;
 	private static final int KEY = 1;
 	private static final int SM_INDEX = 2;
+	
+	private static ArrayList<String> PRONOMS;
+	
+	static {
+		PRONOMS = new ArrayList<String>(Arrays.asList(new String[] {
+				"je","tu","il","elle","nous","vous","ils","elles","le","la","l","lui","leur",
+				"eux","celui","celle","ci","ceci","cela","mien","tien","sien","notre","votre",
+				"mienne","tienne","sienne","miens","tiens","siens","votres","notres","leurs",
+				"on","pas","ne","ni","dont","ou","certain","certaine","certains","certaines",
+				"plusieurs","autre","quelqu","quelque","chose","qui","que","quoi","lequel",
+				"laquelle","lesquels","lesquelles","auquel","auxquels","auxquelles","duquel",
+				"desquelles","desquels", "de", "des", "aux", "au", "les", "par", "et"}));
+	}
 
 
 
@@ -63,7 +78,7 @@ public class Main {
 		for (int i = SM_INDEX+1; i < args.length; i++) {
 			lines = readFile(W + "UnsortedMap/UM" + args[i]);
 			for (String line: lines) {
-				if (line.contains(key)) {
+				if (Pattern.matches("^" + key + "\\s\\d*$", line)) {
 					linesToWrite.add(line);
 				}
 			}
@@ -76,25 +91,41 @@ public class Main {
 		System.out.println(linesToWrite.size());
 	}
 
-
+	
 	/**Computes the mapping given a split file (by its index) and writes the result on a UMx file
 	 * 
 	 * @param idx
 	 * @throws IOException
 	 */
 	public static void map(Integer idx) throws IOException {
-		String input = readFile(W + "Splits/S" + idx).get(0);
+		List<String> lines = readFile(W + "Splits/S" + idx);
+		if (lines.isEmpty())
+			return;
+		
+		String input = lines.get(0);
+		input = input.toLowerCase();
+		input = input.replaceAll("[^a-z0-9]+"," ");
+		input = input.trim();
+		if (input.length() == 0)
+			return;
+		
+		String[] split = input.split(" ");
+		List<String> splitList = new ArrayList<String>(Arrays.asList(split));
+		splitList.removeAll(PRONOMS);
+		if (splitList.isEmpty())
+			return;
+		
+		// Optimize the timeframe where the file is open
 		PrintWriter writer = new PrintWriter(W + "UnsortedMap/UM" + idx);
-
-		HashSet<String> keys = new HashSet<String>();
-		for (String word: input.split(" ")) {
-			writer.println(word + " " + 1);
-			keys.add(word);
+		for (String word: split) {
+			if (word.length() > 1)
+				writer.println(word + " " + 1);
 		}
 		writer.close();
-
-		for (String key: keys) {
-			System.out.println(key);
+		
+		for (String word: new HashSet<String>(splitList)) {
+			if (word.length() > 1)
+				System.out.println(word);
 		}
 	}
 

@@ -1,11 +1,20 @@
 import java.io.PrintWriter;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
-
+/**
+ * @author aroville, rvignes
+ * 
+ * This class is a delegate of the main thread. It receives the splitted file
+ * and a list of SSH-available hosts, and divides the lines among the hosts.
+ * It is also responsible for error handling: if a host fails for any reason,
+ * its task must be started again in order not to lose 
+ */
 public class Mapper {
 	/**
 	 * Class instantiated by the main of MASTER SHAVADOOP JAR with the list of available hosts and all the lines from the input text
@@ -14,7 +23,9 @@ public class Mapper {
 	 */
 
 	static final String W = "/cal/homes/aroville/";
-	static final int MAX_WORK_LOAD = 20;//Max MapThreads to start
+	//Max MapThreads to start
+	static final int MAX_WORK_LOAD = 100;
+	static final int STEP = 10;
 
 	List<String> hosts;
 	List<String> lines;
@@ -43,14 +54,14 @@ public class Mapper {
 	 * @throws Exception
 	 *  
 	 */
-	void split() {
+	void distribute() {
 		System.out.println("Start mapping");
 
 		int nbHosts = hosts.size();
 		String host;
 
 		try {
-			for (int i = 0; i < lines.size(); i++) {
+			for (int i = 0; i < lines.size(); i += STEP) {
 				while (threads.size() >= MAX_WORK_LOAD) {
 					Thread.sleep(200);
 				}
@@ -103,6 +114,11 @@ public class Mapper {
 		}
 	}
 
+	public static String sansAccents(String input) { 
+	    return Normalizer.normalize(input, Normalizer.Form.NFD)
+	            .replaceAll("[^\\p{ASCII}]", "");
+	}
+
 /**
  * Writes the split i into a a Sx file
  * @param i
@@ -111,10 +127,15 @@ public class Mapper {
  */
 	private boolean writeLine(Integer i) {
 		try {
-			String s = clean(lines.get(i)).trim();
-			if (s.length() == 0)
-				throw new Exception("Empty string");
+			String s = lines.get(i);
+			for (int k = i+1; k < Math.min(lines.size(), i + STEP); k++) {
+				s += " " + lines.get(k);
+			}
 			
+			s = sansAccents(s.trim());
+			if (s.isEmpty())
+				return false;
+
 			PrintWriter writer = new PrintWriter(W + "Splits/S" + i, "UTF-8");
 			writer.print(s);
 			writer.close();
@@ -122,7 +143,6 @@ public class Mapper {
 		} catch (Exception e) {
 			return false;
 		}
-
 	}
 
 	/**
@@ -135,7 +155,6 @@ public class Mapper {
 	}
 	
 	
-	
 	/**Restarts a given MapThread if its instanciation failed. 
 	 * As we are network dependent (MapThread are started on other machines by SSH)
 	 * we can encounter issues when trying to connect.
@@ -143,17 +162,19 @@ public class Mapper {
 	 * @param t
 	 */
 	void retry(MapThread t) {
-		System.out.println("Retrying for idx = " + t.getIdx());
-		threads.remove(t);
-		queue(new MapThread(t.getHost(), t.getIdx(), this));		
-	}
-	
-	/**Cleans a given line by removing all non alphanumeric characters
-	 * @return cleaned line s
-	 * @param s 
-	 */
-	String clean(String s) {
-		return s.replaceAll("[^a-zA-Z0-9]+"," ");
+	System.out.println("Retrying for idx = " + t.getIdx());
+	threads.remove(t);
+
+	try {
+		Integer tIndex = ThreadLocalRandom.current().nextInt(0, hosts.size());
+
+		while (threads.size() >= MAX_WORK_LOAD) {
+			Thread.sleep(200);
+		}
+		queue(new MapThread(hosts.get(tIndex), t.getIdx(), this));
+	} catch (InterruptedException e) {
+		e.printStackTrace();
+	}		
 	}
 
 }
