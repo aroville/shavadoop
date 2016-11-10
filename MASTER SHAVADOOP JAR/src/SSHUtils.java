@@ -17,7 +17,7 @@ public class SSHUtils {
 	 * @throws IOException
 	 */
 	static List<String> readHosts() throws IOException {
-		Integer[] rooms = new Integer[] { 133 };
+		Integer[] rooms = new Integer[] { 126, 128, 129, 133 };
 		ArrayList<String> hosts = new ArrayList<String>();
 		for (Integer room: rooms) {
 			getHosts(room.toString());

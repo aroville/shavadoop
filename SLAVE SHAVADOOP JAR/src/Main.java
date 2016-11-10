@@ -38,7 +38,11 @@ public class Main {
 				"on","pas","ne","ni","dont","ou","certain","certaine","certains","certaines",
 				"plusieurs","autre","quelqu","quelque","chose","qui","que","quoi","lequel",
 				"laquelle","lesquels","lesquelles","auquel","auxquels","auxquelles","duquel",
-				"desquelles","desquels", "de", "des", "aux", "au", "les", "par", "et"}));
+				"desquelles","desquels", "de", "des", "aux", "au", "les", "par", "et", "du",
+				"un", "une", "dans", "pour", "sur", "sous", "ce", "ces", "son", "cette", "qu",
+				"est", "sont", "etre", "ainsi", "avec", "soit", "sa", "ca", "meme", "entre",
+				"se", "lorsqu", "si", "ses", "ete", "ont", "ayant", "lors", "celles", "tous",
+				"tout", "toute", "toutes", "comme", "avoir", "en"}));
 	}
 
 

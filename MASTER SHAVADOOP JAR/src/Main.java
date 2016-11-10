@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -56,9 +55,7 @@ public class Main {
 		System.out.println("Time spent on mapping: " + timeSpent);
 
 		startTime = System.currentTimeMillis();
-		Map<String, ArrayList<Integer>> keyUMx = mapper.getKeyUMx();
-		System.out.println(keyUMx);
-		Reducer reducer = new Reducer(hosts, keyUMx);
+		Reducer reducer = new Reducer(hosts, mapper.getKeyUMx());
 		reducer.reduce();
 		timeSpent = System.currentTimeMillis() - startTime;
 		System.out.println("Time spent on reducing: " + timeSpent);

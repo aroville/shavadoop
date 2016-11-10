@@ -25,7 +25,7 @@ public class Mapper {
 	static final String W = "/cal/homes/aroville/";
 	//Max MapThreads to start
 	static final int MAX_WORK_LOAD = 100;
-	static final int STEP = 10;
+	static final int STEP = 200;
 
 	List<String> hosts;
 	List<String> lines;
