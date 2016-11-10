@@ -1,3 +1,5 @@
+package com.telecom.slave.shavadoop
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
@@ -8,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
+
 
 
 /**This class contains all the pieces of code to be sent over the network (computation distribution) on available hosts.
