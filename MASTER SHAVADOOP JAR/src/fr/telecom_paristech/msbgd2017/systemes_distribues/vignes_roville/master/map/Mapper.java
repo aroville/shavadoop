@@ -1,3 +1,5 @@
+package fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.map;
+
 import java.io.PrintWriter;
 import java.text.Normalizer;
 import java.util.ArrayList;

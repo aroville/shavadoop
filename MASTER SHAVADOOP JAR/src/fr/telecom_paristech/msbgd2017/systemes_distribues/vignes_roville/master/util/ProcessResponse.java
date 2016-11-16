@@ -1,3 +1,4 @@
+package fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.util;
 
 public class ProcessResponse {
 	

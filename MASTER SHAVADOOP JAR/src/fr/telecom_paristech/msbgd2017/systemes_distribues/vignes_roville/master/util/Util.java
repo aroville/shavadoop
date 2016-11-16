@@ -1,3 +1,5 @@
+package fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.util;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;

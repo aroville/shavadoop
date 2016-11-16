@@ -1,4 +1,4 @@
-package com.telecom.master.shavadoop
+package fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master;
 
 import java.io.IOException;
 import java.io.PrintWriter;

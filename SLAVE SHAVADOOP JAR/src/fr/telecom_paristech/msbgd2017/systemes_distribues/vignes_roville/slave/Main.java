@@ -1,4 +1,4 @@
-package com.telecom.slave.shavadoop
+package fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.slave;
 
 import java.io.IOException;
 import java.io.PrintWriter;

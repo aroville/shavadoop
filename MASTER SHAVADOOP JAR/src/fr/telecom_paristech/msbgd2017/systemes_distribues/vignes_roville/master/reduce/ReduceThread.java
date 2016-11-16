@@ -1,3 +1,5 @@
+package fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.reduce;
+
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
