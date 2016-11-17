@@ -47,9 +47,8 @@ public class ReduceThread extends Thread {
 		while (reducer.getNextJob(this)) {
 			try {
 				ProcessResponse resp = SSHUtils.execute(command());
-				if (resp.hasError()) {
+				if (resp.hasError())
 					throw new Exception(resp.getErrResponse());
-				}
 
 				count = Integer.parseInt(resp.getStdResponse().replaceAll("\n", ""));
 			} catch (Exception e) {
@@ -84,16 +83,6 @@ public class ReduceThread extends Thread {
 	public Integer getCount() {
 		return count;
 	}
-
-
-	/**Getter of host
-	 * 
-	 * @return host
-	 */
-	String getHost() {
-		return host;
-	}
-
 
 	/**
 	 * Getter of UMx entryset's index
