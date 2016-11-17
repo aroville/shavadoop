@@ -22,7 +22,7 @@ public class Util {
 	 * @return
 	 * @throws IOException
 	 */
-	static List<String> readFile(String fileUrl) throws IOException {
+	public static List<String> readFile(String fileUrl) throws IOException {
 		return Files.readAllLines(Paths.get(fileUrl), Charset.forName("UTF-8"));
 	}
 

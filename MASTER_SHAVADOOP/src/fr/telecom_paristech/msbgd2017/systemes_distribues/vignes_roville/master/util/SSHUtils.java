@@ -6,42 +6,24 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.List;
 
 
 public class SSHUtils {
 
-	
+
 	/**
 	 * Read the list of hosts retrieved by the python program
 	 * @return
 	 * @throws IOException
 	 */
-	static List<String> readHosts() throws IOException {
-		Integer[] rooms = new Integer[] { 126, 128, 129, 133 };
-		ArrayList<String> hosts = new ArrayList<String>();
-		for (Integer room: rooms) {
-			getHosts(room.toString());
-			hosts.addAll(Util.readFile("resources/ips_" + room));
-		}
-		return hosts;
+	public static List<String> readHosts() throws Exception {
+		String py = "python resources/get_hosts.py ";
+		String rooms = "45 124 125 126 127 128 129 130 133";
+		Runtime.getRuntime().exec(py + rooms).waitFor();
+		return Util.readFile("resources/hosts");
 	}
 
-
-	/**
-	 * Launch a python program to ping around the room and find the available machines
-	 * @param room id
-	 */
-	static void getHosts(String room) {
-		try {
-			Runtime.getRuntime().exec("python resources/get_hosts.py " + room).waitFor();
-			System.out.println("Got hosts " + room);		
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-	}
-	
 
 	/**Executes a given command line on the underlying Unix OS CLI.
 	 * 
@@ -66,14 +48,14 @@ public class SSHUtils {
 			while ((n = br.read(buffer)) != -1) {
 				writerStd.write(buffer, 0, n);
 			}
-			
+
 			is = p.getErrorStream();
 			buffer = new char[1024];
 			br = new BufferedReader(new InputStreamReader(is));
 			while ((n = br.read(buffer)) != -1) {
 				writerErr.write(buffer, 0, n);
 			}
-			
+
 			output = new ProcessResponse(writerStd.toString(), writerErr.toString());
 		} catch(Exception ex) {
 			ex.printStackTrace();
@@ -87,17 +69,17 @@ public class SSHUtils {
 			if (p != null)
 				p.destroy();
 		}
-		
+
 		return output;
 	}
-	
+
 	/**Tries to connect by ssh to a given host and tests it's availability by echoing 'pizza'
 	 * 
 	 * @param host
 	 * @return host's availability
 	 * @throws IOException
 	 */
-	
+
 	public static boolean canConnectSSH(String host) throws IOException {
 		InputStream errIs = null;
 		InputStreamReader isr = null;
@@ -116,13 +98,13 @@ public class SSHUtils {
 			while ((n = br.read(buffer)) != -1) {
 				writer.write(buffer, 0, n);
 			}
-			
+
 			output = writer.toString().length() == 0;
-			
+
 			if (!output) {
 				throw new Exception(writer.toString());
 			}
-			
+
 			writer.close();
 		} catch(Exception ex) {
 			return false;
@@ -136,7 +118,7 @@ public class SSHUtils {
 			if (p != null)
 				p.destroy();
 		}
-		
+
 		return output;
 	}
 

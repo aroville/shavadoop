@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.Main;
+import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.util.ProcessResponse;
+import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.util.SSHUtils;
+
 /**Class instantiated by the Mapper @see Mapper
  * giving an host, an index of split and the reference to the calling Mapper
  * @author aroville,rvignes
@@ -13,24 +17,23 @@ import java.util.List;
 
 public class MapThread extends Thread {
 
-	static final String JAR = "/cal/homes/aroville/workspace/MR_slave.jar";
-
 	String host;
 	Integer idx;
 	Mapper mapper;
 	List<String> keys;
 
-/**
- * 
- * @param host
- * @param idx
- * @param mapper
- */
-	MapThread(String host, Integer idx, Mapper mapper) {
+	/**
+	 * 
+	 * @param host
+	 * @param idx
+	 * @param mapper
+	 */
+	public MapThread(String host, Integer idx, Mapper mapper) {
 		this.host = host;
 		this.idx = idx;
 		this.mapper = mapper;
 	}
+	
 
 	/**
 	 * Overriden run method of Thread 
@@ -41,7 +44,7 @@ public class MapThread extends Thread {
 	public void run() {
 		keys = new ArrayList<String>();
 		try {
-			String[] args = new String[] {"ssh", host, "java -jar", JAR, "map", idx.toString()};
+			String[] args = new String[] {"ssh", host, "java -jar", Main.JAR, "map", idx.toString()};
 
 			ProcessResponse result = SSHUtils.execute(args);
 
@@ -59,11 +62,12 @@ public class MapThread extends Thread {
 		}
 	}
 	
+	
 	/**
 	 * 
 	 * @return MapThread's host
 	 */
-	String getHost() {
+	public String getHost() {
 		return host;
 	}
 
@@ -71,7 +75,7 @@ public class MapThread extends Thread {
 	 * 
 	 * @return MapThread's list of keys 
 	 */
-	List<String> getKeys() {
+	public List<String> getKeys() {
 		return keys;
 	}
 
@@ -79,7 +83,7 @@ public class MapThread extends Thread {
 	 * 
 	 * @return MapThread's split index
 	 */
-	Integer getIdx() {
+	public Integer getIdx() {
 		return idx;
 	}
 }

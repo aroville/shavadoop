@@ -41,7 +41,7 @@ public class Mapper {
 	 * and the attribute keyUMx with a new Map of String,Arraylist
 	 * @param hosts, lines
 	 */
-	Mapper(List<String> hosts, List<String> lines) {
+	public Mapper(List<String> hosts, List<String> lines) {
 		this.hosts = hosts;
 		this.lines = lines;
 		threads = new ArrayList<MapThread>();
@@ -56,7 +56,7 @@ public class Mapper {
 	 * @throws Exception
 	 *  
 	 */
-	void distribute() {
+	public void distribute() {
 		System.out.println("Start mapping");
 
 		int nbHosts = hosts.size();
@@ -84,23 +84,27 @@ public class Mapper {
 
 		System.out.println("Distribution over");
 	}
+	
+	
 	/**Enqueues a given MapThread and calls its start method 
 	 * @param t
 	 */
-	synchronized void queue(MapThread t) {
+	public synchronized void queue(MapThread t) {
 		threads.add(t);
 		t.start();
 	}
+	
 
 	/**Dequeues a given MapThread and calls the method storeKeyUMx 
 	 * @param t
 	 */
-	synchronized void dequeue(MapThread t)
+	public synchronized void dequeue(MapThread t)
 	{
 		threads.remove(t);
 		storeKeyUMx(t);
 	}
 
+	
 	/**
 	 * Retrieve the collected keys from the SLAVE SHAVADOOP JAR output and the associated UMx file
 	 * @param t
@@ -115,18 +119,25 @@ public class Mapper {
 			keyUMx.get(key).add(t.getIdx());
 		}
 	}
+	
 
+	/**
+	 * Given a sentence in a latin alphabet, find an equivalent that does not use accents
+	 * @param input
+	 * @return
+	 */
 	public static String sansAccents(String input) { 
 	    return Normalizer.normalize(input, Normalizer.Form.NFD)
 	            .replaceAll("[^\\p{ASCII}]", "");
 	}
 
-/**
- * Writes the split i into a a Sx file
- * @param i
- * @return true if the line i is correctly written to the Sx file (file needed in input of the slave) 
- * or false if the line is empty or if any exception
- */
+	
+	/**
+	 * Writes the split i into a a Sx file
+	 * @param i
+	 * @return true if the line i is correctly written to the Sx file (file needed in input of the slave) 
+	 * or false if the line is empty or if any exception
+	 */
 	private boolean writeLine(Integer i) {
 		try {
 			String s = lines.get(i);
@@ -152,7 +163,7 @@ public class Mapper {
 	 * 
 	 * @return keyUMx
 	 */
-	Map<String, ArrayList<Integer>> getKeyUMx() {
+	public Map<String, ArrayList<Integer>> getKeyUMx() {
 		return keyUMx;
 	}
 	
@@ -163,7 +174,7 @@ public class Mapper {
 	 * @see MapThread
 	 * @param t
 	 */
-	void retry(MapThread t) {
+	public void retry(MapThread t) {
 	System.out.println("Retrying for idx = " + t.getIdx());
 	threads.remove(t);
 

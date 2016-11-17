@@ -18,8 +18,9 @@ public class Reducer {
 	List<ReduceThread> threads;
 	Map<String, ArrayList<Integer>> keyUMx;
 	Map<String, Integer> reduceCount;
-	static final int MAX_WORK_LOAD = 100;
+	Integer fileIdx = 0;
 
+	
 	/**
 	 * 
 	 * @param hosts
@@ -27,43 +28,45 @@ public class Reducer {
 	 */
 	public Reducer(List<String> hosts, Map<String, ArrayList<Integer>> keyUMx) {
 		this.hosts = hosts;
-		this.keyUMx = keyUMx;
+		this.keyUMx = Collections.synchronizedMap(keyUMx);
 		threads = Collections.synchronizedList(new ArrayList<ReduceThread>());
 		reduceCount = Collections.synchronizedMap(new HashMap<String, Integer>());
 	}
 
+	
 	/**
 	 * This method distributes the data (entry sets of UMx files) and computation on the available hosts.
 	 * It proceeds by instanciating ReduceThreads, @see ReduceThread, giving the host on which we want the computation to be done,
 	 * an entry of the UMx and it's index and a reference to the calling Reducer.
 	 * The distribution is done using a modulo between the number of UMx and the number of available hosts
+	 * @throws InterruptedException 
 	 * @throws Exception
 	 * 
 	 */
-	void reduce() {
+	public void reduce() throws InterruptedException {
 		System.out.println("Start reduce");
-		long startTime, timeSpent;
+
+		for (String host: hosts) {
+			threads.add(new ReduceThread(this, host));
+		}
+		
+		while (!keyUMx.isEmpty()) {
+			Thread.sleep(1000);
+		}
 
 		int nbHosts = hosts.size();
 		String host;
-		int i = 0;
 
 		try {
-			startTime = System.currentTimeMillis();
+			int i=0;
 			for (Entry<String, ArrayList<Integer>> e: keyUMx.entrySet()) {
-				while (threads.size() >= MAX_WORK_LOAD) {
-					Thread.sleep(200);
-				}
-
 				host = hosts.get(i % nbHosts);
 				queue(new ReduceThread(i++, host, e, this));
 			}
-			timeSpent = System.currentTimeMillis() - startTime;
-			System.out.println("Time spent on shuffling: " + timeSpent);
-
+			
 			while (threads.size() > 0) {
 				System.out.println("Threads to finish = " + threads.size());
-				Thread.sleep(2000);
+				Thread.sleep(1000);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -71,37 +74,62 @@ public class Reducer {
 
 		System.out.println("Reduce over");
 	}
+	
 
 	/**Enqueues a given ReduceThread and calls its start method 
 	 * @param t
+	 * @throws InterruptedException 
 	 */
-	synchronized void queue(ReduceThread t) {
-		threads.add(t);
-		t.start();
-	}
+//	public synchronized void queue(ReduceThread t) throws InterruptedException {
+//		while (threads.size() >= hosts.size()) {
+//			Thread.sleep(100);
+//		}
+//		
+//		threads.add(t);
+//		t.start();
+//	}
+	
 
 	/**Dequeues a given ReduceThread and calls the method storeReduceCount 
 	 * @param t
 	 */
-	synchronized void dequeue(ReduceThread t) {
+	public synchronized void dequeue(ReduceThread t) {
 		threads.remove(t);
 		storeReduceCount(t);
 	}
+	
 	
 	/**
 	 * Insert a key (e.g a word) and it's count onto the Reducer's reduceCount
 	 * @param t
 	 */
-	void storeReduceCount(ReduceThread t) {
-		reduceCount.put(t.getEntry().getKey(), t.getCount());
+	public void storeReduceCount(ReduceThread t) {
+		Integer count = t.getCount();
+		
+		if (count != null)
+			reduceCount.put(t.getEntry().getKey(), count);
 	}
+	
 	
 	/**Getter of Reducer's reduceCount
 	 * @return reduceCount
 	 */
-	Map<String, Integer> getReduceCount() {
+	public Map<String, Integer> getReduceCount() {
 		return reduceCount;
 	}
+	
+	
+	public synchronized boolean getNextJob(ReduceThread t) {
+		if (keyUMx.isEmpty())
+			return false;
+		
+		Entry<String, ArrayList<Integer>> e = keyUMx.entrySet().iterator().next();
+		keyUMx.remove(e.getKey());
+		t.setEntry(e);
+		t.setIdx(fileIdx++);
+		return true;
+	}
+	
 	
 	/**Restarts a given ReduceThread if its instanciation failed. 
 	 * As we are network dependent (ReduceThreads are started on other machines by SSH)
@@ -109,16 +137,13 @@ public class Reducer {
 	 * @see ReduceThread
 	 * @param ReduceThread t
 	 */
-	void retry(ReduceThread t) {
+	public void retry(ReduceThread t) {
 		System.out.println("Retrying for idx = " + t.getIdx() + "  key = " + t.getEntry().getKey());
 		threads.remove(t);
 
 		try {
-
-			Integer tIndex = ThreadLocalRandom.current().nextInt(0, hosts.size());
-			while (threads.size() >= MAX_WORK_LOAD) {
-				Thread.sleep(200);
-			}
+			int nbHosts = hosts.size();
+			Integer tIndex = ThreadLocalRandom.current().nextInt(0, nbHosts);
 			queue(new ReduceThread(t.getIdx(), hosts.get(tIndex), t.getEntry(), this));		
 		} catch (InterruptedException e) {
 			e.printStackTrace();
