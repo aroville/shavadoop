@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
+import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.Main;
+import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.util.Util;
+
 /**
  * @author aroville, rvignes
  * 
@@ -21,7 +24,6 @@ public class Mapper {
 	/* Class instantiated by the main of MASTER SHAVADOOP JAR with the list of available hosts 
 	 * and all the lines from the input text */
 
-	private static final String W = "/cal/homes/aroville/";
 	private static final int STEP = 200;
 
 	private List<String> hosts;
@@ -42,6 +44,7 @@ public class Mapper {
 		this.lines = lines;
 		threads = new ArrayList<MapThread>();
 		keyUMx = Collections.synchronizedMap(new HashMap<String, ArrayList<Integer>>());
+		Util.createDirectory(Main.PATH + "Splits");
 	}
 	
 
@@ -144,7 +147,7 @@ public class Mapper {
 			if (s.isEmpty())
 				return false;
 
-			PrintWriter writer = new PrintWriter(W + "Splits/S" + i, "UTF-8");
+			PrintWriter writer = new PrintWriter(Main.PATH + "/Splits/S" + i, "UTF-8");
 			writer.print(s);
 			writer.close();
 			return true;
@@ -179,6 +182,7 @@ public class Mapper {
 			while (threads.size() >= hosts.size()) {
 				Thread.sleep(200);
 			}
+			
 			queue(new MapThread(hosts.get(tIndex), t.getIdx(), this));
 		} catch (InterruptedException e) {
 			e.printStackTrace();

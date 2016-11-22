@@ -41,9 +41,7 @@ public class Main {
  * 5) Assembling all the results in a result file
  */
 
-	public static String PATH = Paths.get("").toAbsolutePath().toString();
-//	public static String RES = PATH + "/resources/";
-	
+	public static String PATH;
 	public static String JAR;
 
 	public static void main(String[] args) throws IOException {
@@ -52,6 +50,7 @@ public class Main {
 		String file = args[0];
 		String filename = Paths.get(file).getFileName().toString();
 		
+		PATH = Paths.get("").toAbsolutePath().toString() + "/";
 		JAR = Paths.get(args[1]).toAbsolutePath().toString();
 
 		startTime = System.currentTimeMillis();

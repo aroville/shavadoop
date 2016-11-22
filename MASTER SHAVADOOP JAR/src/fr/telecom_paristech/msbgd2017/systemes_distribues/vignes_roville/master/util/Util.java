@@ -1,5 +1,6 @@
 package fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -48,6 +49,22 @@ public class Util {
 		}
 
 		return result;
+	}
+
+
+	/**
+	 * Create a directory if it doesn't exist yet
+	 * @param dirName The name of the directory
+	 */
+	public static void createDirectory(String dirName) {
+		File dir = new File(dirName);
+		if (!dir.exists()) {
+			try{
+				dir.mkdir();
+			} catch(SecurityException se){
+				se.printStackTrace();
+			}
+		}
 	}
 
 }

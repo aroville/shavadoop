@@ -3,3 +3,6 @@ MASTER SHAVADOOP JAR/resources/*
 **.txt
 .metadata
 .recommenders
+Splits
+UnsortedMap
+ips_*

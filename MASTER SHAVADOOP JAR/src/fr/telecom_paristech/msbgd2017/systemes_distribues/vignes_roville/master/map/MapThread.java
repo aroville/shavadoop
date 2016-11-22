@@ -43,7 +43,8 @@ public class MapThread extends Thread {
 	public void run() {
 		keys = new ArrayList<String>();
 		try {
-			String[] args = new String[] {"ssh", host, "java -jar", Main.JAR, "map", idx.toString()};
+			String[] args = new String[] {
+					"ssh", host, "java -jar", Main.JAR, "map", Main.PATH, idx.toString()};
 
 			ProcessResponse result = SSHUtils.execute(args);
 

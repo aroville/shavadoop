@@ -69,7 +69,8 @@ public class ReduceThread extends Thread {
 			sIdx += " " + UMx.get(i);
 		}
 
-		return new String[] { "ssh", host, "java -jar", Main.JAR, "reduce", key, idx.toString(), sIdx };
+		return new String[] { 
+				"ssh", host, "java -jar", Main.JAR, "reduce", Main.PATH, key, idx.toString(), sIdx };
 	}
 
 
