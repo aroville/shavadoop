@@ -9,6 +9,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.Main;
+
 
 public class SSHUtils {
 
@@ -21,9 +23,10 @@ public class SSHUtils {
 	public static List<String> readHosts() throws IOException {
 		Integer[] rooms = new Integer[] { 126, 128, 129, 133 };
 		ArrayList<String> hosts = new ArrayList<String>();
+		System.out.println(Main.PATH);
 		for (Integer room: rooms) {
 			getHosts(room.toString());
-			hosts.addAll(Util.readFile("resources/ips_" + room));
+			hosts.addAll(Util.readFile(Main.PATH + "/ips_" + room));
 		}
 		return hosts;
 	}
@@ -34,8 +37,10 @@ public class SSHUtils {
 	 * @param room id
 	 */
 	public static void getHosts(String room) {
+		Process p;
 		try {
-			Runtime.getRuntime().exec("python resources/get_hosts.py " + room).waitFor();
+			p = Runtime.getRuntime().exec("python " + Main.PATH + "/get_hosts.py " + room);
+			p.waitFor();
 			System.out.println("Got hosts " + room);		
 		} catch (Exception e1) {
 			e1.printStackTrace();

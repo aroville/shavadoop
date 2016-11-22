@@ -2,14 +2,15 @@ package fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.map.Mapper;
 import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.reduce.Reducer;
-import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.util.SSHUtils;
 import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.util.Util;
+import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.util.SSHUtils;
 
 /**
  * 
@@ -40,11 +41,18 @@ public class Main {
  * 5) Assembling all the results in a result file
  */
 
-	private static final String W = "/cal/homes/aroville/";
-	public static final String JAR = W + "workspace/slave.jar";
+	public static String PATH = Paths.get("").toAbsolutePath().toString();
+//	public static String RES = PATH + "/resources/";
+	
+	public static String JAR;
 
 	public static void main(String[] args) throws IOException {
 		long startTime, timeSpent;
+		
+		String file = args[0];
+		String filename = Paths.get(file).getFileName().toString();
+		
+		JAR = Paths.get(args[1]).toAbsolutePath().toString();
 
 		startTime = System.currentTimeMillis();
 		List<String> hosts = SSHUtils.readHosts();
@@ -52,7 +60,7 @@ public class Main {
 		System.out.println("Time spent on getting hosts: " + timeSpent);
 		
 		startTime = System.currentTimeMillis();
-		List<String> lines = Util.readFile(args[0]);
+		List<String> lines = Util.readFile(file);
 		timeSpent = System.currentTimeMillis() - startTime;
 		System.out.println("Time spent on splitting: " + timeSpent);
 
@@ -70,7 +78,7 @@ public class Main {
 		
 		startTime = System.currentTimeMillis();
 		Map<String, Integer> result = reducer.getReduceCount();
-		PrintWriter writer = new PrintWriter(W + "RESULT_SHAVADOOP");
+		PrintWriter writer = new PrintWriter("RESULT_" + filename);
 		for (Entry<String, Integer> key_count: Util.sortByValue(result).entrySet()) {
 			writer.println(key_count.getKey() + " " + key_count.getValue());
 		}
