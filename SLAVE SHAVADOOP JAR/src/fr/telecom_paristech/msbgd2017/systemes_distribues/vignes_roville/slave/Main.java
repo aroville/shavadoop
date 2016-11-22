@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 
@@ -21,14 +24,10 @@ import java.util.regex.Pattern;
 public class Main {
 
 	private static String W;
-
-	private static final int MODE = 0;
-	private static final int S_PATH = 1;
-	private static final int S_INDEX = 2;
-	private static final int KEY = 2;
-	private static final int SM_INDEX = 3;
-
+	private static int argCount = 0;
 	private static ArrayList<String> PRONOMS;
+
+	private static final String STOP_FLAG = "//=//";
 
 	static {
 		PRONOMS = new ArrayList<String>(Arrays.asList(new String[] {
@@ -42,7 +41,7 @@ public class Main {
 				"un", "une", "dans", "pour", "sur", "sous", "ce", "ces", "son", "cette", "qu",
 				"est", "sont", "etre", "ainsi", "avec", "soit", "sa", "ca", "meme", "entre",
 				"se", "lorsqu", "si", "ses", "ete", "ont", "ayant", "lors", "celles", "tous",
-				"tout", "toute", "toutes", "comme", "avoir", "en"}));
+				"tout", "toute", "toutes", "comme", "avoir", "en", "jusqu"}));
 	}
 
 
@@ -50,15 +49,16 @@ public class Main {
 	/**Executes the map or reduce method considering the argument given to the Main(by the remote command line)
 	 * 
 	 * @param args
+	 * @throws NumberFormatException 
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	public static void main(String[] args) throws InterruptedException, IOException {
-		W = args[S_PATH];
+	public static void main(String[] args) throws NumberFormatException, IOException {
+		String mode = args[argCount++];
+		W = args[argCount++];
 
-		String mode = args[MODE];
 		if (mode.equals("map")) {
-			map(Integer.parseInt(args[S_INDEX]));
+			map(Integer.parseInt(args[argCount]));
 		} else {
 			reduce(args);
 		}
@@ -72,17 +72,65 @@ public class Main {
 	 * @throws IOException 
 	 */
 	public static void reduce(String[] args) throws IOException {
-		List<String> linesToWrite = new ArrayList<String>();
+		List<String> keys = getKeys(args);
+		List<Integer> fileIndexes = getIdx(args);
 
-		for (int i = SM_INDEX + 1; i < args.length; i++) {
-			for (String line: Util.readFile(W + "/UnsortedMap/UM" + args[i])) {
-				if (Pattern.matches("^" + args[KEY] + "\\s\\d*$", line)) {
-					linesToWrite.add(line);
+		Map<String, Integer> res = new HashMap<String, Integer>();
+		for (String k: keys) {
+			res.put(k, 0);
+		}
+
+		for (Integer idx: fileIndexes) {
+			for (String l: Util.readFile(W + "/UnsortedMap/UM" + idx)) {
+				for (String k: keys) {
+					if (Pattern.matches("^" + k + "\\s1$", l)) {
+						res.put(k, res.get(k) + 1);
+					}
 				}
 			}
 		}
 
-		System.out.println(linesToWrite.size());
+		for (Entry<String, Integer> e: res.entrySet()) {
+			System.out.println(e.getKey() + " " + e.getValue());
+		}
+	}
+
+
+	/**
+	 * Retrieve the keys from the arguments
+	 * @param args The arguments passed to the script
+	 * @return An arrayList containing unique keys
+	 */
+	public static List<String> getKeys(String[] args) {
+		List<String> keys = new ArrayList<String>();
+
+		for (; argCount < args.length; argCount++) {
+			String k = args[argCount];
+			if (k.equals(STOP_FLAG)) {
+				argCount++;
+				break;
+			}
+
+			keys.add(k);
+		}
+
+		return keys;
+	}
+
+
+	/**
+	 * Retrieve the keys from the arguments
+	 * @param args The arguments passed to the script
+	 * @return An arrayList containing unique keys
+	 */
+	public static List<Integer> getIdx(String[] args) {
+		List<Integer> idx = new ArrayList<Integer>();
+
+		for (; argCount < args.length; argCount++) {
+			idx.add(Integer.parseInt(args[argCount]));
+		}
+
+		return idx;
 	}
 
 
@@ -107,7 +155,7 @@ public class Main {
 				);
 
 		splitList.removeAll(PRONOMS);
-		
+
 		Util.createDirectory(W + "/UnsortedMap");
 		PrintWriter writer = new PrintWriter(W + "/UnsortedMap/UM" + idx);
 		for (String word: splitList) {

@@ -3,21 +3,26 @@ package fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 
 public class Reducer {
+	
+	private static final int CHUNK_SIZE = 50;
+	
 	/**
 	 * Class instantiated by the main of MASTER SHAVADOOP JAR with the list of available hosts and 
 	 * UMx outputed by the mapper
 	 */
 	private List<String> hosts;
 	private List<ReduceThread> threads;
-	private Map<String, ArrayList<Integer>> keyUMx;
 	private Map<String, Integer> reduceCount;
+	private Map<Set<String>, Set<Integer>> keysUMx;
 
 
 	/**
@@ -27,7 +32,7 @@ public class Reducer {
 	 */
 	public Reducer(List<String> hosts, Map<String, ArrayList<Integer>> keyUMx) {
 		this.hosts = hosts;
-		this.keyUMx = keyUMx;
+		groupKeys(keyUMx);
 		threads = Collections.synchronizedList(new ArrayList<ReduceThread>());
 		reduceCount = Collections.synchronizedMap(new HashMap<String, Integer>());
 	}
@@ -50,7 +55,7 @@ public class Reducer {
 
 		try {
 			startTime = System.currentTimeMillis();
-			for (Entry<String, ArrayList<Integer>> e: keyUMx.entrySet()) {
+			for (Entry<Set<String>, Set<Integer>> e: keysUMx.entrySet()) {
 				while (threads.size() >= nbHosts) {
 					Thread.sleep(200);
 				}
@@ -98,7 +103,7 @@ public class Reducer {
 	 * @param t
 	 */
 	public void storeReduceCount(ReduceThread t) {
-		reduceCount.put(t.getEntry().getKey(), t.getCount());
+		reduceCount.putAll(t.getResult());
 	}
 
 
@@ -123,7 +128,6 @@ public class Reducer {
 		threads.remove(t);
 
 		try {
-
 			Integer tIndex = ThreadLocalRandom.current().nextInt(0, hosts.size());
 			while (threads.size() >= hosts.size()) {
 				Thread.sleep(200);
@@ -132,6 +136,27 @@ public class Reducer {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}	
+	}
+	
+	
+	/**
+	 * Group key-UMx pairs by chunk of same size
+	 * @param keyUMx
+	 */
+	public void groupKeys(Map<String, ArrayList<Integer>> keyUMx) {
+		int nbKeys = keyUMx.size();
+		keysUMx = new HashMap<Set<String>, Set<Integer>>();
+		
+		List<String> keys = new ArrayList<>(keyUMx.keySet());
+		for (int i = 0; i < nbKeys; i+= CHUNK_SIZE) {
+			int max = Math.min(nbKeys, i + CHUNK_SIZE);
+			Set<String> keyChunk = new HashSet<String>(keys.subList(i, max));
+			keysUMx.put(keyChunk, new HashSet<Integer>());
+			
+			for (String key: keyChunk) {
+				keysUMx.get(keyChunk).addAll(keyUMx.get(key));
+			}
+		}
 	}
 
 }

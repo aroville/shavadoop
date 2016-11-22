@@ -1,7 +1,9 @@
 package fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.reduce;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.Main;
 import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.util.ProcessResponse;
@@ -19,15 +21,16 @@ public class ReduceThread extends Thread {
 	Integer idx;
 	String host;
 	Reducer reducer;
-	Integer count;
-	Entry<String, ArrayList<Integer>> entry;
+	Entry<Set<String>, Set<Integer>> entry;
+	Map<String, Integer> result;
 
 
-	public ReduceThread(Integer idx, String host, Entry<String, ArrayList<Integer>> e, Reducer reducer) {
+	public ReduceThread(Integer idx, String host, Entry<Set<String>, Set<Integer>> e, Reducer reducer) {
 		this.idx = idx;
 		this.host = host;
 		this.reducer = reducer;
 		this.entry = e;
+		result = new HashMap<String, Integer>();
 	}
 
 
@@ -45,8 +48,13 @@ public class ReduceThread extends Thread {
 			if (resp.hasError()) {
 				throw new Exception(resp.getErrResponse());
 			}
-
-			count = Integer.parseInt(resp.getStdResponse().replaceAll("\n", ""));
+			
+			
+			String[] res = resp.getStdResponse().split("\n");
+			for (String s: res) {
+				String[] split = s.split(" ");
+				result.put(split[0], Integer.parseInt(split[1]));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			reducer.retry(this);
@@ -61,25 +69,18 @@ public class ReduceThread extends Thread {
 	 * @return Build command line
 	 */
 	private String[] command() {
-		String key = entry.getKey();
-		ArrayList<Integer> UMx = entry.getValue();
-
-		String sIdx = UMx.get(0).toString();
-		for (int i = 1; i < UMx.size(); i++) {
-			sIdx += " " + UMx.get(i);
-		}
-
 		return new String[] { 
-				"ssh", host, "java -jar", Main.JAR, "reduce", Main.PATH, key, idx.toString(), sIdx };
+				"ssh", host, "java -jar", Main.JAR, "reduce", 
+				Main.PATH, cmdLineKeysIdx(entry) };
 	}
 
 
 	/**
-	 * Getter of count
-	 * @return ReduceThread's count
+	 * Getter of result
+	 * @return ReduceThread's result
 	 */
-	public Integer getCount() {
-		return count;
+	public Map<String, Integer> getResult() {
+		return result;
 	}
 
 
@@ -105,8 +106,23 @@ public class ReduceThread extends Thread {
 	 * Getter of UMx entries
 	 * @return  Entry from UMx
 	 */
-	public Entry<String, ArrayList<Integer>> getEntry() {
+	public Entry<Set<String>, Set<Integer>> getEntry() {
 		return entry;
+	}
+	
+
+	
+	public String cmdLineKeysIdx(Entry<Set<String>, Set<Integer>> e) {
+		String res = "";
+		for (String k: e.getKey()) {
+			res += k + " ";
+		}
+		res += "//=// ";
+		for (Integer i: e.getValue()) {
+			res += i.toString() + " ";
+		}
+		
+		return res;
 	}
 
 

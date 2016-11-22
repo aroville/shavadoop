@@ -21,7 +21,7 @@ public class SSHUtils {
 	 * @throws IOException
 	 */
 	public static List<String> readHosts() throws IOException {
-		Integer[] rooms = new Integer[] { 129 };
+		Integer[] rooms = new Integer[] { 124, 125, 126, 127, 128, 129, 130, 133 };
 		ArrayList<String> hosts = new ArrayList<String>();
 		System.out.println(Main.PATH);
 		for (Integer room: rooms) {
