@@ -22,10 +22,16 @@ public class Util {
 	 * @return
 	 * @throws IOException
 	 */
-	static List<String> readFile(String fileUrl) throws IOException {
+	public static List<String> readFile(String fileUrl) throws IOException {
 		return Files.readAllLines(Paths.get(fileUrl), Charset.forName("UTF-8"));
 	}
 
+	
+	/**
+	 * Sort a Map instance by its values
+	 * @param map The map to be sorted
+	 * @return The sorted map
+	 */
 	public static Map<String, Integer> sortByValue(Map<String, Integer> map) {
 		List<Entry<String, Integer>> list = new LinkedList<Entry<String, Integer>>(map.entrySet());
 

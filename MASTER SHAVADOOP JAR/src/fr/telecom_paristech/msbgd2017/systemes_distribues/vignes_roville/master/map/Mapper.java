@@ -18,21 +18,17 @@ import java.util.concurrent.ThreadLocalRandom;
  * its task must be started again in order not to lose 
  */
 public class Mapper {
-	/**
-	 * Class instantiated by the main of MASTER SHAVADOOP JAR with the list of available hosts and all the lines from the input text
-	 * 
-	 * 
-	 */
+	/* Class instantiated by the main of MASTER SHAVADOOP JAR with the list of available hosts 
+	 * and all the lines from the input text */
 
-	static final String W = "/cal/homes/aroville/";
-	//Max MapThreads to start
-	static final int MAX_WORK_LOAD = 100;
-	static final int STEP = 200;
+	private static final String W = "/cal/homes/aroville/";
+	private static final int STEP = 200;
 
-	List<String> hosts;
-	List<String> lines;
-	List<MapThread> threads;
-	Map<String, ArrayList<Integer>> keyUMx;
+	private List<String> hosts;
+	private List<String> lines;
+	private List<MapThread> threads;
+	private Map<String, ArrayList<Integer>> keyUMx;
+	
 
 	/**
 	 * The constructor of the Mapper wich initialise the attributes hosts with the list provided by the Main,
@@ -41,12 +37,13 @@ public class Mapper {
 	 * and the attribute keyUMx with a new Map of String,Arraylist
 	 * @param hosts, lines
 	 */
-	Mapper(List<String> hosts, List<String> lines) {
+	public Mapper(List<String> hosts, List<String> lines) {
 		this.hosts = hosts;
 		this.lines = lines;
 		threads = new ArrayList<MapThread>();
 		keyUMx = Collections.synchronizedMap(new HashMap<String, ArrayList<Integer>>());
 	}
+	
 
 	/**
 	 * This method distributes the data (one or several lines depending on the configuration of a split) and computation on the available Hosts.
@@ -56,7 +53,7 @@ public class Mapper {
 	 * @throws Exception
 	 *  
 	 */
-	void distribute() {
+	public void distribute() {
 		System.out.println("Start mapping");
 
 		int nbHosts = hosts.size();
@@ -64,7 +61,7 @@ public class Mapper {
 
 		try {
 			for (int i = 0; i < lines.size(); i += STEP) {
-				while (threads.size() >= MAX_WORK_LOAD) {
+				while (threads.size() >= nbHosts) {
 					Thread.sleep(200);
 				}
 
@@ -81,31 +78,33 @@ public class Mapper {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		System.out.println("Distribution over");
 	}
+	
+	
 	/**Enqueues a given MapThread and calls its start method 
 	 * @param t
 	 */
-	synchronized void queue(MapThread t) {
+	public synchronized void queue(MapThread t) {
 		threads.add(t);
 		t.start();
 	}
+	
 
 	/**Dequeues a given MapThread and calls the method storeKeyUMx 
 	 * @param t
 	 */
-	synchronized void dequeue(MapThread t)
+	public synchronized void dequeue(MapThread t)
 	{
 		threads.remove(t);
 		storeKeyUMx(t);
 	}
 
+	
 	/**
 	 * Retrieve the collected keys from the SLAVE SHAVADOOP JAR output and the associated UMx file
 	 * @param t
 	 */
-	private void storeKeyUMx(MapThread t) {
+	public void storeKeyUMx(MapThread t) {
 		for (String key: t.getKeys()) {
 			if (key.length() == 0)
 				continue;
@@ -116,24 +115,31 @@ public class Mapper {
 		}
 	}
 
+	
+	/**
+	 * Given a latin alphabet string, return it without special characters
+	 * @param input The input string
+	 * @return The clean string
+	 */
 	public static String sansAccents(String input) { 
-	    return Normalizer.normalize(input, Normalizer.Form.NFD)
-	            .replaceAll("[^\\p{ASCII}]", "");
+		return Normalizer.normalize(input, Normalizer.Form.NFD)
+				.replaceAll("[^\\p{ASCII}]", "");
 	}
 
-/**
- * Writes the split i into a a Sx file
- * @param i
- * @return true if the line i is correctly written to the Sx file (file needed in input of the slave) 
- * or false if the line is empty or if any exception
- */
-	private boolean writeLine(Integer i) {
+	
+	/**
+	 * Writes the split i into a a Sx file
+	 * @param i
+	 * @return true if the line i is correctly written to the Sx file (file needed in input of the slave) 
+	 * or false if the line is empty or if any exception
+	 */
+	public boolean writeLine(Integer i) {
 		try {
 			String s = lines.get(i);
 			for (int k = i+1; k < Math.min(lines.size(), i + STEP); k++) {
 				s += " " + lines.get(k);
 			}
-			
+
 			s = sansAccents(s.trim());
 			if (s.isEmpty())
 				return false;
@@ -147,36 +153,36 @@ public class Mapper {
 		}
 	}
 
+	
 	/**
-	 * Getter of keyUMx 
-	 * 
+	 * Getter of keyUMx
 	 * @return keyUMx
 	 */
-	Map<String, ArrayList<Integer>> getKeyUMx() {
+	public Map<String, ArrayList<Integer>> getKeyUMx() {
 		return keyUMx;
 	}
-	
-	
+
+
 	/**Restarts a given MapThread if its instanciation failed. 
 	 * As we are network dependent (MapThread are started on other machines by SSH)
 	 * we can encounter issues when trying to connect.
 	 * @see MapThread
 	 * @param t
 	 */
-	void retry(MapThread t) {
-	System.out.println("Retrying for idx = " + t.getIdx());
-	threads.remove(t);
+	public void retry(MapThread t) {
+		System.out.println("Retrying for idx = " + t.getIdx());
+		threads.remove(t);
 
-	try {
-		Integer tIndex = ThreadLocalRandom.current().nextInt(0, hosts.size());
+		try {
+			Integer tIndex = ThreadLocalRandom.current().nextInt(0, hosts.size());
 
-		while (threads.size() >= MAX_WORK_LOAD) {
-			Thread.sleep(200);
-		}
-		queue(new MapThread(hosts.get(tIndex), t.getIdx(), this));
-	} catch (InterruptedException e) {
-		e.printStackTrace();
-	}		
+			while (threads.size() >= hosts.size()) {
+				Thread.sleep(200);
+			}
+			queue(new MapThread(hosts.get(tIndex), t.getIdx(), this));
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}		
 	}
 
 }

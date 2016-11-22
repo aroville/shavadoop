@@ -18,7 +18,7 @@ public class SSHUtils {
 	 * @return
 	 * @throws IOException
 	 */
-	static List<String> readHosts() throws IOException {
+	public static List<String> readHosts() throws IOException {
 		Integer[] rooms = new Integer[] { 126, 128, 129, 133 };
 		ArrayList<String> hosts = new ArrayList<String>();
 		for (Integer room: rooms) {
@@ -33,7 +33,7 @@ public class SSHUtils {
 	 * Launch a python program to ping around the room and find the available machines
 	 * @param room id
 	 */
-	static void getHosts(String room) {
+	public static void getHosts(String room) {
 		try {
 			Runtime.getRuntime().exec("python resources/get_hosts.py " + room).waitFor();
 			System.out.println("Got hosts " + room);		

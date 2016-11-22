@@ -6,6 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.map.Mapper;
+import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.reduce.Reducer;
+import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.util.SSHUtils;
+import fr.telecom_paristech.msbgd2017.systemes_distribues.vignes_roville.master.util.Util;
+
 /**
  * 
  * @author aroville,rvignes
@@ -36,6 +41,7 @@ public class Main {
  */
 
 	private static final String W = "/cal/homes/aroville/";
+	public static final String JAR = W + "workspace/slave.jar";
 
 	public static void main(String[] args) throws IOException {
 		long startTime, timeSpent;

@@ -1,7 +1,5 @@
-.metadata/**
-.recommenders/**
-*.jar
-*.txt
-systemes_repartis_bigdata/**
-SLAVE SHAVADOOP JAR/bin/Main.class
-MASTER SHAVADOOP JAR/bin/*.class
+systemes_repartis_bigdata
+MASTER SHAVADOOP JAR/resources/*
+**.txt
+.metadata
+.recommenders

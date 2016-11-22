@@ -10,18 +10,18 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 public class Reducer {
-/**
- * Class instantiated by the main of MASTER SHAVADOOP JAR with the list of available hosts and 
- * UMx outputed by the mapper
- */
-	List<String> hosts;
-	List<ReduceThread> threads;
-	Map<String, ArrayList<Integer>> keyUMx;
-	Map<String, Integer> reduceCount;
-	static final int MAX_WORK_LOAD = 100;
+	/**
+	 * Class instantiated by the main of MASTER SHAVADOOP JAR with the list of available hosts and 
+	 * UMx outputed by the mapper
+	 */
+	private List<String> hosts;
+	private List<ReduceThread> threads;
+	private Map<String, ArrayList<Integer>> keyUMx;
+	private Map<String, Integer> reduceCount;
+
 
 	/**
-	 * 
+	 * Instantiate a new Reducer object
 	 * @param hosts
 	 * @param keyUMx
 	 */
@@ -32,15 +32,15 @@ public class Reducer {
 		reduceCount = Collections.synchronizedMap(new HashMap<String, Integer>());
 	}
 
+
 	/**
 	 * This method distributes the data (entry sets of UMx files) and computation on the available hosts.
 	 * It proceeds by instanciating ReduceThreads, @see ReduceThread, giving the host on which we want the computation to be done,
 	 * an entry of the UMx and it's index and a reference to the calling Reducer.
 	 * The distribution is done using a modulo between the number of UMx and the number of available hosts
 	 * @throws Exception
-	 * 
 	 */
-	void reduce() {
+	public void reduce() {
 		System.out.println("Start reduce");
 		long startTime, timeSpent;
 
@@ -51,7 +51,7 @@ public class Reducer {
 		try {
 			startTime = System.currentTimeMillis();
 			for (Entry<String, ArrayList<Integer>> e: keyUMx.entrySet()) {
-				while (threads.size() >= MAX_WORK_LOAD) {
+				while (threads.size() >= nbHosts) {
 					Thread.sleep(200);
 				}
 
@@ -72,51 +72,60 @@ public class Reducer {
 		System.out.println("Reduce over");
 	}
 
-	/**Enqueues a given ReduceThread and calls its start method 
+
+	/**
+	 * Enqueues a given ReduceThread and calls its start method 
 	 * @param t
 	 */
-	synchronized void queue(ReduceThread t) {
+	public synchronized void queue(ReduceThread t) {
 		threads.add(t);
 		t.start();
 	}
 
-	/**Dequeues a given ReduceThread and calls the method storeReduceCount 
+
+	/**
+	 * Dequeues a given ReduceThread and calls the method storeReduceCount 
 	 * @param t
 	 */
-	synchronized void dequeue(ReduceThread t) {
+	public synchronized void dequeue(ReduceThread t) {
 		threads.remove(t);
 		storeReduceCount(t);
 	}
-	
+
+
 	/**
 	 * Insert a key (e.g a word) and it's count onto the Reducer's reduceCount
 	 * @param t
 	 */
-	void storeReduceCount(ReduceThread t) {
+	public void storeReduceCount(ReduceThread t) {
 		reduceCount.put(t.getEntry().getKey(), t.getCount());
 	}
-	
-	/**Getter of Reducer's reduceCount
+
+
+	/**
+	 * Getter of Reducer's reduceCount
 	 * @return reduceCount
 	 */
-	Map<String, Integer> getReduceCount() {
+	public Map<String, Integer> getReduceCount() {
 		return reduceCount;
 	}
-	
-	/**Restarts a given ReduceThread if its instanciation failed. 
+
+
+	/**
+	 * Restarts a given ReduceThread if its instanciation failed. 
 	 * As we are network dependent (ReduceThreads are started on other machines by SSH)
 	 * we can encounter issues when trying to connect.
 	 * @see ReduceThread
 	 * @param ReduceThread t
 	 */
-	void retry(ReduceThread t) {
+	public void retry(ReduceThread t) {
 		System.out.println("Retrying for idx = " + t.getIdx() + "  key = " + t.getEntry().getKey());
 		threads.remove(t);
 
 		try {
 
 			Integer tIndex = ThreadLocalRandom.current().nextInt(0, hosts.size());
-			while (threads.size() >= MAX_WORK_LOAD) {
+			while (threads.size() >= hosts.size()) {
 				Thread.sleep(200);
 			}
 			queue(new ReduceThread(t.getIdx(), hosts.get(tIndex), t.getEntry(), this));		
